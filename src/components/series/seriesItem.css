@@ -1,0 +1,11 @@
+.seriesItemWrapper {
+    height: 20px;
+    text-align: left;
+    padding-left: 20px;
+    padding-top: 8px;
+    background-color: antiquewhite;
+}
+
+.seriesItemName {
+    font-size: 1.2rem;
+}
