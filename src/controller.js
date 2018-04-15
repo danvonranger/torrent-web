@@ -1,29 +1,47 @@
-const poller = ()=> {
-    console.log('Here we go a polling...');
-    const data = [
-        {name: "One"},
-        {name: "Two"},
-        {name: "Three"},
-        {name: "Four"},
-        {name: "Five"}
-    ];
 
-    for(let n of data){
-        console.log(n.name);
-        //await delay(5000);
+class Controller {
+    constructor() {
+        this.serviceSeries = {};
     }
-}
 
-// const delay = async (duration) => {
-//     return await function(){
-// 		return new Promise(function(resolve, reject){
-// 			setTimeout(function(){
-// 				resolve();
-// 			}, duration)
-// 		});
-// 	};
-// }
+    async seriesCount() {
+        this.serviceSeries = await this.retrieveSeriesAsync();
+        return this.serviceSeries.length;
+    }
 
-module.exports = {
-    poller
+    async retrieveSeriesAsync() {
+        const res = await fetch('/api/series/');
+        return await res.json();
+    }
+
+    async retrieveSeasonData(id) {
+        const res = await fetch(`/api/seasons/${id}`);
+        return await res.json();
+    }
+
+    async triggerUpdate(index) {
+        const series = this.nextSeries(index);
+        const seasonData = await this.retrieveSeasonData(series.id);
+        await this.delay();
+        for (let season of seasonData) {
+            if (season.episode === "*") continue;
+            yield this.setCurrentProgress(series, season);
+            await this.delay();
+        }
+    }
+
+    async delay(){
+        await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+
+    setCurrentProgress(series, season) {
+        const progressMessage = `Updating ${series.name} Season: ${season.season} Episode: ${season.episode}`;
+        return { action: progressMessage };
+    }
+
+    nextSeries(index) {
+        return this.serviceSeries[index];
+    }
+
 }
+export default new Controller();

@@ -3,9 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "cheerio": "^1.0.0-rc.2",
+    "classnames": "^2.2.5",
+    "libxmljs": "^0.18.7",
+    "node-cmd": "^3.0.0",
+    "parse-torrent-title": "^1.2.0",
     "react": "^16.3.1",
     "react-dom": "^16.3.1",
-    "react-scripts": "1.1.4"
+    "react-scripts": "1.1.4",
+    "xmldoc": "^1.1.0",
+    "xmlhttprequest": "^1.8.0"
   },
   "scripts": {
     "start": "react-scripts start",

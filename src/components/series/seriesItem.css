@@ -9,3 +9,16 @@
 .seriesItemName {
     font-size: 1.2rem;
 }
+
+.updatedWithData {
+    color: green;
+}
+
+.updatedNoData{
+    color: cadetblue;
+    font-weight: bold;
+}
+
+.pendingUpdate {
+    color: orange;
+}

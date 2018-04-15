@@ -1,45 +1,62 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
-// import Series from './components/series/series';
+import Series from './components/series/series';
 import Progress from './components/progress/progress';
-// import Poller from './controller';
+import WebService from './data/web-service';
+import DownloadManager from './download/download-manager';
+import MagnetLinkDownloader from './download/magnet-downloader';
+const cheerio = require('cheerio');
+const config = require('./config/config');
+
 
 class App extends Component {
 
   constructor() {
     super();
-    this.timer = null;
-    this.state = {};
-    this.counter = 0;
-    this.serviceSeries = {};
-  }
 
-  componentDidMount() {
-    this.retrieveSeries()
-      .then(() => {
-        console.log(this.serviceSeries);
-        this.timer = setInterval(() => this.getItems(), 1000);
-      });
-  }
-
-  retrieveSeries() {
-    return fetch('/api/series/')
-      .then(res => res.json())
-      .then(s => {
-        this.serviceSeries = s;
-      });
-  }
-
-  getItems() {
-    if (this.counter === this.serviceSeries.length) {
-      console.log('Stopping timer.');
-      clearInterval(this.timer);
-    } else {
-      const series = this.serviceSeries[this.counter];
-      this.counter++;
-      this.setState({ action: "Updating ", series: series.name });
+    this.state = {
+      updatedIds: [],
+      series: [],
+      action: ""
     }
+  }
+
+  async componentDidMount() {
+    this.setProgress(`Retrieving TV series from server`);
+    const serviceSeries = await WebService.retrieveSeriesAsync();
+    this.setState({ series: serviceSeries });
+    this.triggerUpdate();
+  }
+  async delay() {
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  }
+
+  async triggerUpdate() {
+    for (let series of this.state.series) {
+      this.setProgress(`Retrieving updates for: ${series.name}`);
+      this.markAsUpdated(series);
+      const torrentInformation = await DownloadManager.getTorrentInformation(series);
+      console.log(torrentInformation);
+      for (let torrent of torrentInformation) {
+        const res = await WebService.triggerDownload(torrent);
+        if (res === true) {
+          await WebService.markComplete(torrent);
+        }
+      }
+    }
+    this.setProgress(`All updates completed.`);
+    console.log('done');
+  }
+
+  markAsUpdated(series) {
+    let updatedSoFar = this.state.updatedIds;
+    updatedSoFar.push(series.id);
+    this.setState({ updatedIds: updatedSoFar });
+  }
+
+  setProgress(progressMessage) {
+    this.setState({ action: progressMessage });
   }
 
   render() {
@@ -50,6 +67,7 @@ class App extends Component {
           <h1 className="App-title">TV Series</h1>
         </header>
         <Progress data={this.state} />
+        <Series data={this.state} />
       </div>
     );
   }

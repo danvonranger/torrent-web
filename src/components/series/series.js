@@ -11,19 +11,15 @@ class Series extends Component {
         }
     }
 
-    componentDidMount() {
-        fetch('/api/series')
-            .then(res => res.json())
-            .then(series => this.setState({ series }));
-    }
-
     render() {
+        let updatedIds = this.props.data.updatedIds;
         return (
-            <div>                
-                 {this.state.series.map(function (item, index) {
-                   return(
-                       <SeriesItem item={item} key={index} />
-                   );
+            <div>
+                {this.props.data.series.map(function (item, index) {
+                    let updated = updatedIds.indexOf(item.id) > -1;
+                    return (
+                        <SeriesItem status={updated} item={item} key={index} />
+                    );
                 })}
             </div>
         );

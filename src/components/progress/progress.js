@@ -5,9 +5,7 @@ class Progress extends Component {
 
     render() {
         return (
-            <div className="progressStatus"> 
-                Current Status: {this.props.data.action} {this.props.data.series}
-            </div>
+            <div className="progressStatus">{this.props.data.action}</div>
         );
     }
 }
